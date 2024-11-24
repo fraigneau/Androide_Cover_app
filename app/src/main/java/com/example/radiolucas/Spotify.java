@@ -16,6 +16,9 @@ import com.spotify.sdk.android.auth.AuthorizationResponse;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * The Spotify class provides functionality to connect to the Spotify app remote and authenticate the user.
+ */
 public class Spotify {
 
     private static final String CLIENT_ID = "fc99f5a7950c4d11b44dca56a05bffc6"; // Replace with your client ID
@@ -24,10 +27,20 @@ public class Spotify {
     private final MainActivity activity;
     public SpotifyAppRemote mSpotifyAppRemote;
 
+    /**
+     * Constructs a new Spotify instance.
+     *
+     * @param activity the main activity of the application
+     */
     public Spotify(MainActivity activity) {
         this.activity = activity;
     }
 
+    /**
+     * Connects to the Spotify app remote using the provided access token.
+     *
+     * @param accessToken the access token for Spotify
+     */
     public void connectToSpotifyRemote(String accessToken) {
         ConnectionParams connectionParams = new ConnectionParams.Builder(CLIENT_ID)
                 .setRedirectUri(REDIRECT_URI)
@@ -49,7 +62,6 @@ public class Spotify {
                             Downloader coverDownloader = new Downloader();
 
                             try {
-
                                 PlayerState updatedPlayerState = getPlayerStateWithTimeout();
                                 assert updatedPlayerState.track.imageUri.raw != null;
                                 Log.e("Currently Playing", updatedPlayerState.track.imageUri.raw);
@@ -72,32 +84,38 @@ public class Spotify {
         });
     }
 
+    /**
+     * Retrieves the player state with a timeout.
+     *
+     * @return the player state
+     * @throws Exception if an error occurs while retrieving the player state
+     */
     @NonNull
     private PlayerState getPlayerStateWithTimeout() throws Exception {
-        long timeout = TimeUnit.SECONDS.toMillis(20); // 20 seconds timeout
+        long timeout = TimeUnit.SECONDS.toMillis(20);
         long startTime = System.currentTimeMillis();
 
         while (true) {
-            // Check if the timeout has been reached
             if (System.currentTimeMillis() - startTime > timeout) {
                 throw new TimeoutException("Timed out waiting for player state");
             }
 
-            // Attempt to get the player state
             PlayerState playerState = mSpotifyAppRemote.getPlayerApi().getPlayerState().await().getData();
             if (playerState != null) {
-                return playerState; // Return player state if successfully retrieved
+                return playerState;
             }
 
-            // Add a small delay before retrying
             try {
-                Thread.sleep(500); // Retry every 500 ms
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 throw new Exception("Thread interrupted while waiting for player state", e);
             }
         }
     }
 
+    /**
+     * Authenticates the user with Spotify.
+     */
     public void authenticateSpotify() {
         AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(CLIENT_ID,
                 AuthorizationResponse.Type.TOKEN, REDIRECT_URI);

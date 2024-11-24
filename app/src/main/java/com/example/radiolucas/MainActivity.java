@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.radiolucas.cover.CoverSave;
 import com.example.radiolucas.cover.CoverSaveManager;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.sdk.android.auth.AuthorizationClient;
@@ -20,7 +19,6 @@ public class MainActivity extends AppCompatActivity {
     StorageManager storageManager = new StorageManager(this);
     Spotify spotify = new Spotify(this);
     CoverSaveManager coverSaveManager = new CoverSaveManager(this);
-    //Resize resize = new Resize();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
         storageManager.createAppFolder("Cover");
         storageManager.createAppFolder("Resize");
         coverSaveManager.createCoverDirectories();
-        //resize.compresserImage(this);
 
     }
 

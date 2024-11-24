@@ -13,55 +13,50 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * The Downloader class provides functionality to download files from a given URL.
+ */
 public class Downloader {
 
+    /**
+     * Downloads a file from the URL specified in the CoverInfo object and saves it to the device.
+     *
+     * @param coverInfo the CoverInfo object containing the URL and file name
+     * @param context   the context of the application
+     */
     public void downloadFile(CoverInfo coverInfo, Context context) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    // Créer une connexion
                     URL url = new URL(coverInfo.cover_url);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                     connection.connect();
 
-                    // Vérifier le code de réponse
                     if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                         Log.e("Cover_Downloader", "Erreur serveur: " + connection.getResponseCode());
                         throw new RuntimeException("Erreur serveur: " + connection.getResponseCode());
-
                     }
 
-                    // Préparer le téléchargement
                     int fileLength = connection.getContentLength();
                     InputStream input = new BufferedInputStream(connection.getInputStream());
                     Log.e("Cover_Downloader", "Téléchargement en cours : ");
 
-                    // Utiliser ByteArrayOutputStream pour capturer tous les bytes
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                    // Tampon pour la lecture
                     byte[] buffer = new byte[4096];
                     int count;
 
-                    // Lire et stocker tous les bytes
                     while ((count = input.read(buffer)) != -1) {
                         byteArrayOutputStream.write(buffer, 0, count);
                     }
-                    // Convertir le flux en tableau de bytes
-                    byte[] downloadedData = byteArrayOutputStream.toByteArray();
 
-                    // Fermer les flux
+                    byte[] downloadedData = byteArrayOutputStream.toByteArray();
                     byteArrayOutputStream.close();
                     input.close();
 
-                    // Initialiser le gestionnaire de sauvegarde
                     CoverSaveManager coverSaveManager = new CoverSaveManager(context);
-
-                    // Créer les répertoires si nécessaire
                     coverSaveManager.createCoverDirectories();
 
-                    // Sauvegarder le fichier dans le dossier NATIVE
                     Log.e("Cover_Downloader", "Sauvegarde du fichier : " + coverInfo.cover_name + ".jpg");
                     File savedFile = coverSaveManager.saveFile(
                             downloadedData,
@@ -69,7 +64,7 @@ public class Downloader {
                             ".jpg",
                             CoverSaveManager.StorageLocation.NATIVE
                     );
-                    // Log du résultat
+
                     if (savedFile != null) {
                         Log.e("Cover_Downloader", "Téléchargement terminé : " + savedFile.getAbsolutePath());
                     } else {
