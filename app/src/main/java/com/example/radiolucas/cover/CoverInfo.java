@@ -14,12 +14,4 @@ public class CoverInfo {
         cover_url = spotify_id.replace("spotify:image:", "https://i.scdn.co/image/");
         //Log.e("CoverInfo", "Cover URL : " + cover_url);
     }
-
-    public String getCover_url() {
-        return cover_url;
-    }
-
-    public String getCover_name() {
-        return cover_name;
-    }
 }

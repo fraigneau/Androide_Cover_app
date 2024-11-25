@@ -7,6 +7,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.radiolucas.cover.CoverInfo;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
         storageManager.createAppFolder("Cover");
         storageManager.createAppFolder("Resize");
         coverSaveManager.createCoverDirectories();
+        //testresize();
 
     }
 
@@ -58,4 +60,12 @@ public class MainActivity extends AppCompatActivity {
             SpotifyAppRemote.disconnect(spotify.mSpotifyAppRemote);
         }
     }
+
+    public void testresize() {
+        Resize resize = new Resize(this);
+        //CoverInfo coverInfo = new CoverInfo();
+        resize.Image("/storage/emulated/0/Download/native/ab67616d0000b273a281c8c6cb1b0630d3a24bd7.jpg", "/storage/emulated/0/Download/resize/cover.jpg");
+    }
 }
+
+//
