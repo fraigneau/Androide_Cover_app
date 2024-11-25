@@ -69,7 +69,7 @@ public class Downloader {
                     } else {
                         Log.e("Cover_Downloader", "Échec de sauvegarde du fichier");
                     }
-                    
+
                 } catch (Exception e) {
                     Log.e("Cover_Downloader", "Erreur de téléchargement : " + e.getMessage(), e);
                 }

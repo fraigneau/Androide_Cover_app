@@ -1,8 +1,12 @@
 package com.example.radiolucas;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 1337;
 
-    StorageManager storageManager = new StorageManager(this);
     Spotify spotify = new Spotify(this);
+    StorageManager storageManager = new StorageManager(this);
     SaveManager coverSaveManager = new SaveManager(this);
 
     @Override
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         storageManager.createAppFolder("Cover");
         storageManager.createAppFolder("Resize");
         coverSaveManager.createCoverDirectories();
+
         //testresize();
 
     }
@@ -65,6 +70,16 @@ public class MainActivity extends AppCompatActivity {
         Resize resize = new Resize(this);
         //CoverInfo coverInfo = new CoverInfo();
         resize.Image("/storage/emulated/0/Download/native/ab67616d0000b273a281c8c6cb1b0630d3a24bd7.jpg", "/storage/emulated/0/Download/resize/cover.jpg");
+    }
+
+    public void ImageAffiche(String cover_url) {
+
+        ImageView Image;
+        Image = findViewById(R.id.Spotifycover);
+        Image.setImageResource(R.drawable.red_foreground);
+        Uri imageUri = Uri.parse(cover_url);
+        Image.setImageURI(imageUri);
+
     }
 }
 
