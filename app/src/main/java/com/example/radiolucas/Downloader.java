@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.radiolucas.cover.CoverInfo;
-import com.example.radiolucas.cover.CoverSaveManager;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,7 +53,7 @@ public class Downloader {
                     byteArrayOutputStream.close();
                     input.close();
 
-                    CoverSaveManager coverSaveManager = new CoverSaveManager(context);
+                    SaveManager coverSaveManager = new SaveManager(context);
                     coverSaveManager.createCoverDirectories();
 
                     Log.e("Cover_Downloader", "Sauvegarde du fichier : " + coverInfo.cover_name + ".jpg");
@@ -62,7 +61,7 @@ public class Downloader {
                             downloadedData,
                             coverInfo.cover_name,
                             ".jpg",
-                            CoverSaveManager.StorageLocation.NATIVE
+                            SaveManager.StorageLocation.NATIVE
                     );
 
                     if (savedFile != null) {

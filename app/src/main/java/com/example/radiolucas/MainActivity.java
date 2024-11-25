@@ -7,7 +7,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.radiolucas.cover.CoverSaveManager;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
@@ -18,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     StorageManager storageManager = new StorageManager(this);
     Spotify spotify = new Spotify(this);
-    CoverSaveManager coverSaveManager = new CoverSaveManager(this);
+    SaveManager coverSaveManager = new SaveManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
