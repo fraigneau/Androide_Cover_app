@@ -15,18 +15,25 @@ import com.spotify.sdk.android.auth.AuthorizationResponse;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 1337;
-    public static String Uri_Spotify;
-    Spotify spotify = new Spotify(this);
-    StorageManager storageManager = new StorageManager(this);
-    SaveManager coverSaveManager = new SaveManager(this);
+    private static final String TAG = "MainActivity";
+    public String UriSpotify;
+
+    private Spotify spotify;
+    private SaveManager coverSaveManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Authentification Spotify et préparation des répertoires
+        // Initialisation des classes nécessaires
+        spotify = new Spotify(this);
+        coverSaveManager = new SaveManager(this);
+
+        // Authentification Spotify
         spotify.authenticateSpotify();
+
+        // Préparation des répertoires pour les couvertures
         coverSaveManager.createCoverDirectories();
     }
 
@@ -35,22 +42,23 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == REQUEST_CODE) {
+            // Gestion de la réponse de l'authentification Spotify
             AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, intent);
 
             switch (response.getType()) {
                 case TOKEN:
+                    Log.d(TAG, "Auth successful. Token received.");
                     spotify.connectToSpotifyRemote(response.getAccessToken());
                     break;
+
                 case ERROR:
-                    Log.e("SpotifyAuth", "Auth error: " + response.getError());
+                    Log.e(TAG, "Auth error: " + response.getError());
                     break;
+
                 default:
+                    Log.w(TAG, "Unexpected response type: " + response.getType());
             }
-
-            if (Uri_Spotify != null) {
-                CoverInfo coverInfo = new CoverInfo(Uri_Spotify);
-            }
-
+            Log.e(TAG, "Auth response: " + UriSpotify);
         }
     }
 
@@ -58,15 +66,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
+        // Déconnexion de Spotify pour éviter les fuites mémoire
         if (spotify.mSpotifyAppRemote != null && spotify.mSpotifyAppRemote.isConnected()) {
             SpotifyAppRemote.disconnect(spotify.mSpotifyAppRemote);
         }
     }
 
-    public void setCoverUri(String uri_spotify) {
-        Uri_Spotify = uri_spotify;
-        CoverInfo coverInfo = new CoverInfo(Uri_Spotify);
-        Log.e("CoverUri", "Cover URI : " + uri_spotify);
-
+    /**
+     * Définit l'URI de la couverture et initialise CoverInfo.
+     *
+     * @param UriSpotify l'URI de la couverture Spotify
+     */
+    public String setCoverUri(String UriSpotify) {
+        if (UriSpotify != null && !UriSpotify.isEmpty()) {
+            Log.d(TAG, "Cover URI received: " + UriSpotify);
+            CoverInfo coverInfo = new CoverInfo(UriSpotify); // Créer un objet CoverInfo avec l'URI
+            return this.UriSpotify;
+        } else {
+            Log.w(TAG, "Cover URI is null or empty.");
+            return "STTTTTTTTTTTTTTTTTTTTTTTTOOOOOOOOOOOOOOOOOOOOOOOOP";
+        }
     }
 }

@@ -13,6 +13,7 @@ import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -55,35 +56,42 @@ public class Spotify {
                 mSpotifyAppRemote = spotifyAppRemote;
                 Log.e("SpotifyRemote", "Connected! Yay!");
 
+                // Subscribe to player state and fetch asynchronously
                 mSpotifyAppRemote.getPlayerApi().subscribeToPlayerState().setEventCallback(playerState -> {
-                    // Utilisation de MyThread pour récupérer Uri
-                    MyThread myThread = new MyThread();
-                    myThread.start();
-
-                    new Thread(() -> {
-                        // Attendre que le thread soit terminé
-                        while (!myThread.isComplete()) {
-                            try {
-                                Thread.sleep(2000); // Vérification toutes les 100ms
-                            } catch (InterruptedException e) {
-                                Log.e("MyThread", "Thread interrupted", e);
-                            }
-                        }
-
-                        // Récupérer la valeur de Uri une fois le thread terminé
-                        Uri = myThread.getResultUri();
-                        activity.runOnUiThread(() -> {
-                            Toast.makeText(activity, "Cover URI : " + Uri, Toast.LENGTH_LONG).show();
-                            activity.setCoverUri(Uri);
-
-                        });
-                    }).start();
+                    fetchUriAsync()
+                            .thenAccept(uri -> {
+                                activity.runOnUiThread(() -> {
+                                    Toast.makeText(activity, "Cover URI : " + uri, Toast.LENGTH_LONG).show();
+                                    activity.setCoverUri(uri);
+                                });
+                                Log.e("SpotifyRemote", "Cover URI : " + uri);
+                            })
+                            .exceptionally(e -> {
+                                Log.e("SpotifyRemote", "Error fetching URI asynchronously", e);
+                                return null;
+                            });
                 });
             }
 
             @Override
             public void onFailure(Throwable throwable) {
                 Log.e("SpotifyRemote", "Failed to connect", throwable);
+            }
+        });
+    }
+
+    /**
+     * Fetches the URI asynchronously using CompletableFuture.
+     *
+     * @return a CompletableFuture containing the URI
+     */
+    private CompletableFuture<String> fetchUriAsync() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                PlayerState playerState = getPlayerStateWithTimeout();
+                return playerState.track.imageUri.raw;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to fetch player state", e);
             }
         });
     }
@@ -128,33 +136,5 @@ public class Spotify {
         AuthorizationRequest request = builder.build();
 
         AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request);
-    }
-
-    /**
-     * Classe MyThread pour récupérer ou traiter Uri
-     */
-    public class MyThread extends Thread {
-        private String resultUri;
-        private boolean isComplete = false;
-
-        @Override
-        public void run() {
-            try {
-                // Simulation d'un traitement ou récupération de l'URI
-                PlayerState playerState = getPlayerStateWithTimeout();
-                resultUri = playerState.track.imageUri.raw;
-                isComplete = true;
-            } catch (Exception e) {
-                Log.e("MyThread", "Error in thread execution", e);
-            }
-        }
-
-        public String getResultUri() {
-            return resultUri;
-        }
-
-        public boolean isComplete() {
-            return isComplete;
-        }
     }
 }
