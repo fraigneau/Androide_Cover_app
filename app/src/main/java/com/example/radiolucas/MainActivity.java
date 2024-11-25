@@ -1,12 +1,8 @@
 package com.example.radiolucas;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +15,7 @@ import com.spotify.sdk.android.auth.AuthorizationResponse;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 1337;
-
+    public static String Uri_Spotify;
     Spotify spotify = new Spotify(this);
     StorageManager storageManager = new StorageManager(this);
     SaveManager coverSaveManager = new SaveManager(this);
@@ -28,13 +24,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Authentification Spotify et préparation des répertoires
         spotify.authenticateSpotify();
-        storageManager.createAppFolder("Cover");
-        storageManager.createAppFolder("Resize");
         coverSaveManager.createCoverDirectories();
-
-        //testresize();
-
     }
 
     @Override
@@ -52,35 +45,28 @@ public class MainActivity extends AppCompatActivity {
                     Log.e("SpotifyAuth", "Auth error: " + response.getError());
                     break;
                 default:
-                    Log.e("SpotifyAuth", "Auth result: " + response.getType());
             }
+
+            if (Uri_Spotify != null) {
+                CoverInfo coverInfo = new CoverInfo(Uri_Spotify);
+            }
+
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Disconnect from Spotify to avoid memory leaks
+
         if (spotify.mSpotifyAppRemote != null && spotify.mSpotifyAppRemote.isConnected()) {
             SpotifyAppRemote.disconnect(spotify.mSpotifyAppRemote);
         }
     }
 
-    public void testresize() {
-        Resize resize = new Resize(this);
-        //CoverInfo coverInfo = new CoverInfo();
-        resize.Image("/storage/emulated/0/Download/native/ab67616d0000b273a281c8c6cb1b0630d3a24bd7.jpg", "/storage/emulated/0/Download/resize/cover.jpg");
-    }
-
-    public void ImageAffiche(String cover_url) {
-
-        ImageView Image;
-        Image = findViewById(R.id.Spotifycover);
-        Image.setImageResource(R.drawable.red_foreground);
-        Uri imageUri = Uri.parse(cover_url);
-        Image.setImageURI(imageUri);
+    public void setCoverUri(String uri_spotify) {
+        Uri_Spotify = uri_spotify;
+        CoverInfo coverInfo = new CoverInfo(Uri_Spotify);
+        Log.e("CoverUri", "Cover URI : " + uri_spotify);
 
     }
 }
-
-//

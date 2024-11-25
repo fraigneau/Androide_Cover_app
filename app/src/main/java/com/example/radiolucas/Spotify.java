@@ -1,10 +1,10 @@
 package com.example.radiolucas;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.example.radiolucas.cover.CoverInfo;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -26,14 +26,15 @@ public class Spotify {
     private static final int REQUEST_CODE = 1337;
     private final MainActivity activity;
     public SpotifyAppRemote mSpotifyAppRemote;
+    public String Uri;
 
     /**
      * Constructs a new Spotify instance.
      *
-     * @param activity the main activity of the application
+     * @param context the main activity of the application
      */
-    public Spotify(MainActivity activity) {
-        this.activity = activity;
+    public Spotify(MainActivity context) {
+        this.activity = context;
     }
 
     /**
@@ -55,24 +56,27 @@ public class Spotify {
                 Log.e("SpotifyRemote", "Connected! Yay!");
 
                 mSpotifyAppRemote.getPlayerApi().subscribeToPlayerState().setEventCallback(playerState -> {
-                    new Thread(new Runnable() {
+                    // Utilisation de MyThread pour récupérer Uri
+                    MyThread myThread = new MyThread();
+                    myThread.start();
 
-                        @Override
-                        public void run() {
-                            Downloader coverDownloader = new Downloader();
-
+                    new Thread(() -> {
+                        // Attendre que le thread soit terminé
+                        while (!myThread.isComplete()) {
                             try {
-                                PlayerState updatedPlayerState = getPlayerStateWithTimeout();
-                                assert updatedPlayerState.track.imageUri.raw != null;
-                                Log.e("Currently Playing", updatedPlayerState.track.imageUri.raw);
-                                CoverInfo Info = new CoverInfo(playerState.track.imageUri.raw);
-                                assert playerState.track.imageUri.raw != null;
-                                coverDownloader.downloadFile(Info, activity);
-
-                            } catch (Exception e) {
-                                Log.e("SpotifyRemote", "Error fetching player state", e);
+                                Thread.sleep(2000); // Vérification toutes les 100ms
+                            } catch (InterruptedException e) {
+                                Log.e("MyThread", "Thread interrupted", e);
                             }
                         }
+
+                        // Récupérer la valeur de Uri une fois le thread terminé
+                        Uri = myThread.getResultUri();
+                        activity.runOnUiThread(() -> {
+                            Toast.makeText(activity, "Cover URI : " + Uri, Toast.LENGTH_LONG).show();
+                            activity.setCoverUri(Uri);
+
+                        });
                     }).start();
                 });
             }
@@ -124,5 +128,33 @@ public class Spotify {
         AuthorizationRequest request = builder.build();
 
         AuthorizationClient.openLoginActivity(activity, REQUEST_CODE, request);
+    }
+
+    /**
+     * Classe MyThread pour récupérer ou traiter Uri
+     */
+    public class MyThread extends Thread {
+        private String resultUri;
+        private boolean isComplete = false;
+
+        @Override
+        public void run() {
+            try {
+                // Simulation d'un traitement ou récupération de l'URI
+                PlayerState playerState = getPlayerStateWithTimeout();
+                resultUri = playerState.track.imageUri.raw;
+                isComplete = true;
+            } catch (Exception e) {
+                Log.e("MyThread", "Error in thread execution", e);
+            }
+        }
+
+        public String getResultUri() {
+            return resultUri;
+        }
+
+        public boolean isComplete() {
+            return isComplete;
+        }
     }
 }

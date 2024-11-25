@@ -42,4 +42,9 @@ public class StorageManager {
         Log.e("StorageManager", "Dossier créé avec succès : " + folder.getAbsolutePath());
         return folder;
     }
+
+    public boolean checkFileExists(String coverPath) {
+        File file = new File(coverPath);
+        return file.exists();
+    }
 }

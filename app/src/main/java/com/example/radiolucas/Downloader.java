@@ -1,7 +1,10 @@
 package com.example.radiolucas;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.example.radiolucas.cover.CoverInfo;
 
